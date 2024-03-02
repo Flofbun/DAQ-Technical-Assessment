@@ -11,13 +11,45 @@ const WS_PORT = 8080;
 const tcpServer = net.createServer();
 const websocketServer = new WebSocketServer({ port: WS_PORT });
 
+let temp_checker: VehicleData[] = [];
+let count = 0;
+
 tcpServer.on("connection", (socket) => {
   console.log("TCP client connected");
 
   socket.on("data", (msg) => {
     console.log(`Received: ${msg.toString()}`);
 
-    const jsonData: VehicleData = JSON.parse(msg.toString());
+    let jsonData: VehicleData;
+
+    try {
+      jsonData = JSON.parse(msg.toString());
+    } catch (error) {
+      const msg_fix = msg.toString().slice(0, -1);
+      jsonData = JSON.parse(msg_fix);
+    }
+
+    if(temp_checker.length >= 5) {
+      for(let i = 0; i < temp_checker.length; i++) {
+        if(temp_checker[i].battery_temperature < 20 || temp_checker[i].battery_temperature > 80) {
+          count ++;
+        }
+      }
+      if(count >= 3) {
+        console.log(`ERROR: Unsafe battery temperatures reached at: ${jsonData.timestamp}`);
+      }
+      temp_checker.shift();
+      count = 0;
+    }
+  
+    temp_checker.push(jsonData);
+  
+//    console.log(temp_checker);
+//    console.log(temp_checker[3]);
+//    console.log(temp_checker[3].battery_temperature);
+//    console.log(jsonData);
+//    console.log(jsonData.battery_temperature);
+
 
     // Send JSON over WS to frontend clients
     websocketServer.clients.forEach(function each(client) {

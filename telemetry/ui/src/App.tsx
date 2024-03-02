@@ -3,6 +3,7 @@ import LiveValue from "./live_value";
 import RedbackLogo from "./redback_logo.jpg";
 import "./App.css";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import Battery from "./battery_with_thermometer.jpg";
 
 const WS_URL = "ws://localhost:8080";
 
@@ -52,6 +53,12 @@ function App() {
           alt="Redback Racing Logo"
         />
         <p className="value-title">Live Battery Temperature</p>
+        <img
+          src={Battery}
+          className="battery"
+          alt="Battery with Thermometer"
+          style={{ maxWidth: '6%', height: 'auto'}}
+        />
         <LiveValue temp={temperature} />
       </header>
     </div>
